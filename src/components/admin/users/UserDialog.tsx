@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, SubmitHandler } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import {
@@ -33,7 +33,7 @@ import { useRoles } from '@/hooks/useRoles';
 const userSchema = z.object({
   name: z.string().min(2, 'Name must be at least 2 characters'),
   email: z.string().email('Invalid email address'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional(),
+  password: z.string().min(6, 'Password must be at least 6 characters').nullable(),
   roleId: z.string().min(1, 'Role is required'),
   subscriptionPlan: z.enum(['free', 'pro', 'enterprise']),
 });
@@ -53,14 +53,14 @@ export default function UserDialog({
 }: UserDialogProps) {
   const { toast } = useToast();
   const { roles } = useRoles();
-  const form = useForm({
+  const form = useForm<z.infer<typeof userSchema>>({
     resolver: zodResolver(userSchema),
     defaultValues: {
       name: '',
       email: '',
       password: '',
       roleId: '',
-      subscriptionPlan: 'free' as const,
+      subscriptionPlan: 'free',
     },
   });
 
@@ -69,35 +69,40 @@ export default function UserDialog({
       form.reset({
         name: user.name,
         email: user.email,
+        password: null, // Password is nullable
         roleId: user.roleId,
-        subscriptionPlan: user.subscriptionPlan,
+        subscriptionPlan: user.subscriptionPlan as 'free' | 'pro' | 'enterprise',
       });
     } else {
       form.reset({
         name: '',
         email: '',
-        password: '',
+        password: null, // Password is nullable
         roleId: '',
         subscriptionPlan: 'free',
       });
     }
   }, [user, form]);
 
-  const onSubmit = async (data: z.infer<typeof userSchema>) => {
+  const onSubmit: SubmitHandler<z.infer<typeof userSchema>> = async (data) => {
     try {
       if (user) {
-        await updateUser(user.id, data);
-        toast({
-          title: 'Success',
-          description: 'User updated successfully',
+        // Update user
+        await updateUser(user.id, {
+          ...data,
+          password: data.password || '', // Ensure password is defined
         });
       } else {
-        await createUser(data);
-        toast({
-          title: 'Success',
-          description: 'User created successfully',
+        // Create user
+        await createUser({
+          ...data,
+          password: data.password || 'defaultPassword',
         });
       }
+      toast({
+        title: 'Success',
+        description: user ? 'User updated successfully' : 'User created successfully',
+      });
       onSuccess();
       onOpenChange(false);
     } catch (error) {
@@ -154,7 +159,7 @@ export default function UserDialog({
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" {...field} />
+                      <Input type="password" {...field}   value={field.value ?? ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

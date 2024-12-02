@@ -7,6 +7,52 @@ import { buttonVariants } from '@/components/ui/button';
 
 export type CalendarProps = React.ComponentProps<typeof DayPicker>;
 
+function CustomCaption({ displayMonth }: { displayMonth: Date }) {
+  const handlePrevious = () => {
+    const previousMonth = new Date(
+      displayMonth.getFullYear(),
+      displayMonth.getMonth() - 1
+    );
+    return previousMonth;
+  };
+
+  const handleNext = () => {
+    const nextMonth = new Date(
+      displayMonth.getFullYear(),
+      displayMonth.getMonth() + 1
+    );
+    return nextMonth;
+  };
+
+  return (
+    <div className="flex items-center justify-between">
+      <button
+        type="button"
+        onClick={handlePrevious}
+        className={cn(
+          buttonVariants({ variant: 'outline' }),
+          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+        )}
+      >
+        <ChevronLeftIcon className="h-4 w-4" />
+      </button>
+      <span className="text-sm font-medium">
+        {displayMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}
+      </span>
+      <button
+        type="button"
+        onClick={handleNext}
+        className={cn(
+          buttonVariants({ variant: 'outline' }),
+          'h-7 w-7 bg-transparent p-0 opacity-50 hover:opacity-100'
+        )}
+      >
+        <ChevronRightIcon className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
+
 function Calendar({
   className,
   classNames,
@@ -58,8 +104,7 @@ function Calendar({
         ...classNames,
       }}
       components={{
-        IconLeft: ({ ...props }) => <ChevronLeftIcon className="h-4 w-4" />,
-        IconRight: ({ ...props }) => <ChevronRightIcon className="h-4 w-4" />,
+        Caption: CustomCaption,
       }}
       {...props}
     />
