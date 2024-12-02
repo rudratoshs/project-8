@@ -17,6 +17,8 @@ import AdminLayout from '@/components/admin/AdminLayout';
 import Dashboard from '@/components/admin/Dashboard';
 import AdminLogin from '@/components/admin/AdminLogin';
 import UserList from '@/components/admin/users/UserList';
+import RoleList from '@/components/admin/roles/RoleList';
+import PermissionList from '@/components/admin/permissions/PermissionList';
 
 function App() {
   const [showAuthModal, setShowAuthModal] = useState(false);
@@ -42,6 +44,8 @@ function App() {
                     <Routes>
                       <Route path="/" element={<Dashboard />} />
                       <Route path="/users" element={<UserList />} />
+                      <Route path="/roles" element={<RoleList />} />
+                      <Route path="/permissions" element={<PermissionList />} />
                       <Route path="*" element={<Navigate to="/admin" replace />} />
                     </Routes>
                   </AdminLayout>

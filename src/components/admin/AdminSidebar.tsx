@@ -9,9 +9,11 @@ import {
   ChevronLeft,
   Plus,
   UserCircle,
-  LogOut
+  LogOut,
+  Shield,
+  Lock
 } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useState } from 'react';
 import { motion } from 'framer-motion';
@@ -23,8 +25,9 @@ interface AdminSidebarProps {
 
 const menuItems = [
   { icon: BarChart, label: 'Dashboard', href: '/admin' },
-  { icon: BookOpen, label: 'Courses', href: '/admin/courses' },
   { icon: Users, label: 'Users', href: '/admin/users' },
+  { icon: Shield, label: 'Roles', href: '/admin/roles' },
+  { icon: Lock, label: 'Permissions', href: '/admin/permissions' },
   { icon: Settings, label: 'Settings', href: '/admin/settings' },
   { icon: HelpCircle, label: 'Help', href: '/admin/help' },
 ];
@@ -32,6 +35,7 @@ const menuItems = [
 export default function AdminSidebar({ open, onOpenChange }: AdminSidebarProps) {
   const { user, logout } = useAuth();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const location = useLocation();
 
   const handleLogout = async () => {
     try {
@@ -89,21 +93,27 @@ export default function AdminSidebar({ open, onOpenChange }: AdminSidebarProps) 
         </div>
 
         <div className="space-y-1">
-          {menuItems.map((item) => (
-            <Link
-              key={item.label}
-              to={item.href}
-              className={cn(
-                "flex items-center px-3 py-2 text-gray-600 rounded-lg hover:bg-gray-100 transition-colors",
-                !open && "justify-center"
-              )}
-            >
-              <item.icon className="h-5 w-5" />
-              {open && (
-                <span className="ml-3 text-sm font-medium">{item.label}</span>
-              )}
-            </Link>
-          ))}
+          {menuItems.map((item) => {
+            const isActive = location.pathname === item.href;
+            return (
+              <Link
+                key={item.label}
+                to={item.href}
+                className={cn(
+                  "flex items-center px-3 py-2 rounded-lg transition-colors",
+                  !open && "justify-center",
+                  isActive 
+                    ? "bg-primary/10 text-primary"
+                    : "text-gray-600 hover:bg-gray-100"
+                )}
+              >
+                <item.icon className="h-5 w-5" />
+                {open && (
+                  <span className="ml-3 text-sm font-medium">{item.label}</span>
+                )}
+              </Link>
+            );
+          })}
         </div>
       </nav>
 

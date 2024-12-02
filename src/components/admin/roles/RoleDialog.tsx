@@ -154,7 +154,7 @@ export default function RoleDialog({
                             <FormControl>
                               <Checkbox
                                 checked={field.value?.includes(permission.id)}
-                                onCheckedChange={(checked:boolean) => {
+                                onCheckedChange={(checked) => {
                                   const value = field.value || [];
                                   return checked
                                     ? field.onChange([...value, permission.id])

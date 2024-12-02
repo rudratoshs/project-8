@@ -7,13 +7,10 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
-import { Role } from '@/lib/types/role';
+import { Permission } from '@/lib/types/permission';
 import { useToast } from '@/components/ui/use-toast';
-import { deleteRole } from '@/lib/api/roles';
-import RoleDialog from './RoleDialog';
-import { Badge } from '@/components/ui/badge';
+import { deletePermission } from '@/lib/api/permissions';
+import PermissionDialog from './PermissionDialog';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,39 +25,43 @@ import { IconButton } from 'rsuite';
 import EditIcon from '@rsuite/icons/Edit';
 import TrashIcon from '@rsuite/icons/Trash';
 
-interface RoleTableProps {
-  roles: Role[];
-  onRoleChange: () => void;
+interface PermissionTableProps {
+  permissions: Permission[];
+  onPermissionChange: () => void;
   loading?: boolean;
 }
 
-export default function RoleTable({ roles, onRoleChange, loading }: RoleTableProps) {
-  const [selectedRole, setSelectedRole] = useState<Role | null>(null);
+export default function PermissionTable({
+  permissions,
+  onPermissionChange,
+  loading,
+}: PermissionTableProps) {
+  const [selectedPermission, setSelectedPermission] = useState<Permission | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [permissionToDelete, setPermissionToDelete] = useState<Permission | null>(null);
   const { toast } = useToast();
 
-  const handleDelete = async (role: Role) => {
+  const handleDelete = async (permission: Permission) => {
     try {
-      await deleteRole(role.id);
+      await deletePermission(permission.id);
       toast({
         title: 'Success',
-        description: 'Role deleted successfully',
+        description: 'Permission deleted successfully',
       });
-      onRoleChange();
+      onPermissionChange();
     } catch (error) {
       toast({
         variant: 'destructive',
         title: 'Error',
-        description: 'Failed to delete role',
+        description: 'Failed to delete permission',
       });
     } finally {
-      setRoleToDelete(null);
+      setPermissionToDelete(null);
     }
   };
 
-  const handleEdit = (role: Role) => {
-    setSelectedRole(role);
+  const handleEdit = (permission: Permission) => {
+    setSelectedPermission(permission);
     setIsDialogOpen(true);
   };
 
@@ -72,10 +73,10 @@ export default function RoleTable({ roles, onRoleChange, loading }: RoleTablePro
     );
   }
 
-  if (!roles.length) {
+  if (!permissions.length) {
     return (
       <div className="text-center py-12">
-        <p className="text-muted-foreground">No roles found</p>
+        <p className="text-muted-foreground">No permissions found</p>
       </div>
     );
   }
@@ -88,23 +89,17 @@ export default function RoleTable({ roles, onRoleChange, loading }: RoleTablePro
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
-              <TableHead>Permissions</TableHead>
+              <TableHead>Created At</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {roles.map((role) => (
-              <TableRow key={role.id}>
-                <TableCell className="font-medium">{role.name}</TableCell>
-                <TableCell>{role.description}</TableCell>
+            {permissions.map((permission) => (
+              <TableRow key={permission.id}>
+                <TableCell className="font-medium">{permission.name}</TableCell>
+                <TableCell>{permission.description}</TableCell>
                 <TableCell>
-                  <div className="flex flex-wrap gap-2">
-                    {role.permissions.map((rp) => (
-                      <Badge key={rp.permission.id} variant="secondary">
-                        {rp.permission.name}
-                      </Badge>
-                    ))}
-                  </div>
+                  {new Date(permission.createdAt).toLocaleDateString()}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
@@ -115,18 +110,16 @@ export default function RoleTable({ roles, onRoleChange, loading }: RoleTablePro
                       style={{
                         color: 'blue',
                       }}
-                      onClick={() => handleEdit(role)}
+                      onClick={() => handleEdit(permission)}
                     />
                     <IconButton
                       icon={<TrashIcon />}
                       size="sm"
                       appearance="ghost"
                       style={{
-                        color: role.name === 'admin' ? 'gray' : 'red',
-                        cursor: role.name === 'admin' ? 'not-allowed' : 'pointer',
+                        color: 'red',
                       }}
-                      onClick={() => setRoleToDelete(role)}
-                      disabled={role.name === 'admin'}
+                      onClick={() => setPermissionToDelete(permission)}
                     />
                   </div>
                 </TableCell>
@@ -136,26 +129,29 @@ export default function RoleTable({ roles, onRoleChange, loading }: RoleTablePro
         </Table>
       </div>
 
-      <RoleDialog
-        role={selectedRole}
+      <PermissionDialog
+        permission={selectedPermission}
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
-        onSuccess={onRoleChange}
+        onSuccess={onPermissionChange}
       />
 
-      <AlertDialog open={!!roleToDelete} onOpenChange={() => setRoleToDelete(null)}>
+      <AlertDialog
+        open={!!permissionToDelete}
+        onOpenChange={() => setPermissionToDelete(null)}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Are you sure?</AlertDialogTitle>
             <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the role
-              and remove all associated permissions.
+              This action cannot be undone. This will permanently delete the permission
+              and may affect roles that use it.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={() => roleToDelete && handleDelete(roleToDelete)}
+              onClick={() => permissionToDelete && handleDelete(permissionToDelete)}
               className="bg-red-500 hover:bg-red-600"
             >
               Delete
