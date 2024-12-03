@@ -39,4 +39,9 @@ router.delete('/:id',
   (req, res) => courseController.deleteCourse(req, res)
 );
 
+router.post('/:courseId/topics/:topicId/generate',
+  requirePermission('edit_course'),
+  (req, res) => courseController.generateTopicContent(req, res)
+);
+
 export default router;

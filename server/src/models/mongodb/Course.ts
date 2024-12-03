@@ -10,11 +10,13 @@ export interface ICourse extends Document {
     title: string;
     content: string;
     order: number;
+    status: 'incomplete' | 'complete'; // Added status field
     subtopics?: Array<{
       id: string;
       title: string;
       content: string;
       order: number;
+      status: 'incomplete' | 'complete'; // Added status field
     }>;
   }>;
 }
@@ -27,16 +29,18 @@ const CourseSchema = new Schema<ICourse>(
     accessibility: { type: String, enum: ['free', 'paid', 'limited'], required: true },
     topics: [
       {
-        id: { type: String },
+        id: { type: String, default: () => new mongoose.Types.ObjectId().toString() }, // Generate unique ID
         title: { type: String },
         content: { type: String },
         order: { type: Number },
+        status: { type: String, enum: ['incomplete', 'complete'], default: 'incomplete' }, // Default status
         subtopics: [
           {
-            id: { type: String },
+            id: { type: String, default: () => new mongoose.Types.ObjectId().toString() }, // Generate unique ID
             title: { type: String },
             content: { type: String },
             order: { type: Number },
+            status: { type: String, enum: ['incomplete', 'complete'], default: 'incomplete' }, // Default status
           },
         ],
       },

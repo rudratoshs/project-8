@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CourseService } from '../services/course.service';
+import { CourseService, } from '../services/course.service';
 import { CreateCourseData, UpdateCourseData } from '../types/course';
 
 export class CourseController {
@@ -88,6 +88,19 @@ export class CourseController {
       });
     }
   }
+
+  async generateTopicContent(req: Request, res: Response) {
+    try {
+      const { courseId, topicId } = req.params;
+      const topic = await this.courseService.generateTopicContent(courseId, topicId);
+      res.json(topic);
+    } catch (error) {
+      console.error('Generate topic content error:', error);
+      res.status(400).json({
+        message: error instanceof Error ? error.message : 'Failed to generate topic content',
+      });
+    }
+  } 
 }
 
 export default new CourseController();
